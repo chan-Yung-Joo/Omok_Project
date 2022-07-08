@@ -182,12 +182,50 @@ def checkWinnerVertical():
         black_count = 0
         white_count = 0
 
-# 대각선 검사(1)
+# 대각선 검사(1) 
+# -> Right Top to Left Buttom
 def checkWinnerCross1():
-    pass
+
+    global win_black, win_white
+    global black_count, white_count
+
+    for i in range(4, board_height + 1 ):
+        for j in range(i, -1, -1):
+            if dol_order[i-j][j] == 1:
+                black_count += 1
+                white_count = 0
+            elif dol_order[i-j][j] == 2:
+                white_count += 1
+                black_count = 0
+        
+        if black_count == 5:
+            win_black = True
+            win_white = False
+        elif white_count == 5:
+            win_white = True
+            win_black = False
+        else:
+            win_black = None
+            win_white = None
+        
+        black_count = 0
+        white_count = 0
+    
+
 
 # 대각선 검사(2)
+# -> Left Buttom to Right Top
 def checkWinnerCross2():
+    pass
+
+# 대각선 검사(3) 
+# -> Left Top to Right Buttom
+def checkWinnerCross3():
+    pass
+
+# 대각선 검사(4)
+# -> Right Buttom to Left Top
+def checkWinnerCross4():
     pass
 
 # 승자를 결정하는 함수 -> 함수 호출들로만 구성 되어 있음
@@ -273,6 +311,7 @@ while done:
 
                         checkWinnerHorizontal()
                         checkWinnerVertical()
+                        checkWinnerCross1()
 
                         if win_black == True:
                             print("검은 돌 승리!")
@@ -305,6 +344,7 @@ while done:
 
                         checkWinnerHorizontal()
                         checkWinnerVertical()
+                        checkWinnerCross1()
 
                         if win_white == True:
                             print("흰 돌 승리!")
