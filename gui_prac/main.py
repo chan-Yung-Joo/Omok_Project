@@ -14,6 +14,7 @@ BOARD_COLOR = (255, 204, 102)
 
 done = True
 wrong = False
+invalid = None
 
 pad = 40
 cell_size = 50
@@ -71,167 +72,6 @@ def DrawMenu():
     screen.blit(img_purin, (550, 830))
 
     pygame.display.flip()
-
-
-def checkWinnerHorizontal():
-    global win_black, win_white
-    global black_count, white_count
-    #1. 가로(Left to Right)
-    for i in range(1, board_height):
-        for j in range(1, board_width):
-            if dol_order[i][j] == 1: # 검은 돌인 경우
-                black_count += 1
-                white_count = 0
-            elif dol_order[i][j] == 2: # 흰색 돌인 경우
-                white_count += 1
-                black_count = 0
-            
-        if black_count == 5 : # 검은색이 이긴 경우
-            win_black = True
-            win_white = False
-            break
-        elif white_count == 5 : # 흰색이 이긴 경우
-            win_white = True
-            win_black = False
-            break
-        else:
-            win_black = None
-            win_white = None
-    
-        black_count = 0
-        white_count = 0
-    
-
-    #2. 가로(Right to Left)
-    for i in range(board_height-1, -1, -1):
-        for j in range(board_width-1, -1, -1):
-            if dol_order[i][j] == 1: # 검은 돌인 경우
-                black_count += 1
-                white_count = 0
-            elif dol_order[i][j] == 2: # 흰색 돌인 경우
-                white_count += 1
-                black_count = 0
-            
-        if black_count == 5 : # 검은색이 이긴 경우
-            win_black = True
-            win_white = False
-            break
-        elif white_count == 5 : # 흰색이 이긴 경우
-            win_white = True
-            win_black = False
-            break
-        else:
-            win_black = None
-            win_white = None
-    
-        black_count = 0
-        white_count = 0
-
-def checkWinnerVertical():
-    # 위아래로 검사
-    global win_black, win_white
-    global black_count, white_count
-    
-    # 1. 위에서 아래(Top to Bottom)
-    for i in range(0, board_width):
-        for j in range(0, board_height):
-            if dol_order[j][i] == 1 : # 검은 돌인 경우
-                black_count += 1
-                white_count = 0
-            elif dol_order[j][i] == 2: # 흰 돌인 경우
-                white_count += 1
-                black_count = 0
-        
-        if black_count == 5:
-            win_black = True
-            win_white = False
-            break
-        elif white_count == 5:
-            win_white = True
-            win_black = False
-            break
-        else:
-            win_black = None
-            win_white = None
-
-        black_count = 0
-        white_count = 0
-
-    # 2. 아래에서 위(Buttom to Top)
-    for i in range(board_width-1, -1, -1):
-        for j in range(board_height-1, -1, -1):
-            if dol_order[j][i] == 1 : # 검은 돌인 경우
-                black_count += 1
-                white_count = 0
-            elif dol_order[j][i] == 2: # 흰 돌인 경우
-                white_count += 1
-                black_count = 0
-        
-        if black_count == 5:
-            win_black = True
-            win_white = False
-            break
-        elif white_count == 5:
-            win_white = True
-            win_black = False
-            break
-        else:
-            win_black = None
-            win_white = None
-
-        black_count = 0
-        white_count = 0
-
-# 대각선 검사(1) 
-# -> Right Top to Left Buttom
-def checkWinnerCross1():
-
-    global win_black, win_white
-    global black_count, white_count
-
-    for i in range(4, board_height + 1 ):
-        for j in range(i, -1, -1):
-            if dol_order[i-j][j] == 1:
-                black_count += 1
-                white_count = 0
-            elif dol_order[i-j][j] == 2:
-                white_count += 1
-                black_count = 0
-        
-        if black_count == 5:
-            win_black = True
-            win_white = False
-        elif white_count == 5:
-            win_white = True
-            win_black = False
-        else:
-            win_black = None
-            win_white = None
-        
-        black_count = 0
-        white_count = 0
-    
-
-
-# 대각선 검사(2)
-# -> Left Buttom to Right Top
-def checkWinnerCross2():
-    pass
-
-# 대각선 검사(3) 
-# -> Left Top to Right Buttom
-def checkWinnerCross3():
-    pass
-
-# 대각선 검사(4)
-# -> Right Buttom to Left Top
-def checkWinnerCross4():
-    pass
-
-# 승자를 결정하는 함수 -> 함수 호출들로만 구성 되어 있음
-def checkWinner():
-    checkWinnerHorizontal()
-    checkWinnerVertical()
 
 pygame.init()
 
@@ -292,11 +132,11 @@ while done:
 
                 screen.blit(img_check, (400, 850))
 
-                if dim_px < 0 or dim_px > 15 or dim_py < 0 or dim_py > 15:
+                if dim_px < 0 or dim_px > board_width or dim_py < 0 or dim_py > board_height:
                     print("범위 밖에 위치임", end = '\n')
                     text = ft.render("범위 밖에 위치임", True, RED)
                     screen.blit(text, (200, 770))
-                    wrong = True
+                    invalid = True
 
                 else :
                     # 이미 그 자리에 돌이 있는 경우에는 에러 메시지 출력
@@ -309,9 +149,29 @@ while done:
                         screen.blit(img_black_dol, (px + (dol_size//2), py + (dol_size//2)))
                         dol_order[dim_px][dim_py] = 1 # 검은 돌임을 의미
 
-                        checkWinnerHorizontal()
-                        checkWinnerVertical()
-                        checkWinnerCross1()
+                        #우, 하, 우대, 좌대
+                        dr = [0, 1, 1, 1]
+                        dc = [1, 0, 1, -1]
+
+                        for start_r in range(board_height):
+                            for start_c in range(board_width):
+                                if dol_order[start_r][start_c] == 1:
+                                    for d in range(4):
+                                        r = start_r
+                                        c = start_c
+                                        cnt = 0
+
+                                        while 0<= r <= board_height-1 and 0<= c <= board_width - 1 and dol_order[r][c] == 1:
+                                            cnt += 1
+                                            r += dr[d]
+                                            c += dc[d]
+                                        
+                                        if cnt >= 5:
+                                            win_black = True
+                                            win_white = False
+                    
+                        # checkWinner()
+                        
 
                         if win_black == True:
                             print("검은 돌 승리!")
@@ -326,9 +186,12 @@ while done:
                 dim_px = px // 50
                 dim_py = py // 50
 
-                if dim_px < 0 or dim_px > 15 or dim_py < 0 or dim_py > 15:
+                if dim_px < 0 or dim_px > board_width or dim_py < 0 or dim_py > board_height:
                     print("범위 밖의 위치임", end = '\n')
+                    text = ft.render("범위 밖에 위치임", True, RED)
+                    screen.blit(text, (200, 770))
                     wrong = True
+                    invalid = True
 
                 else :
 
@@ -342,9 +205,31 @@ while done:
                         screen.blit(img_white_dol, (px + (dol_size//2), py + (dol_size//2)))
                         dol_order[dim_px][dim_py] = 2
 
-                        checkWinnerHorizontal()
-                        checkWinnerVertical()
-                        checkWinnerCross1()
+                        #우, 하, 우대, 좌대
+                        dr = [0, 1, 1, 1]
+                        dc = [1, 0, 1, -1]
+
+                        for start_r in range(board_height):
+                            for start_c in range(board_width):
+                                if dol_order[start_r][start_c] == 2:
+                                    for d in range(4):
+                                        r = start_r
+                                        c = start_c
+                                        cnt = 0
+
+                                        while 0<= r <= board_height-1 and 0<= c <= board_width - 1 and dol_order[r][c] == 2:
+                                            cnt += 1
+                                            r += dr[d]
+                                            c += dc[d]
+                                        
+                                        if cnt >= 5:
+                                            win_white = True
+                                            win_black = False
+
+
+                    
+
+                        # checkWinner()
 
                         if win_white == True:
                             print("흰 돌 승리!")
